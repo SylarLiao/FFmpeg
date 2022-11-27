@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "atomic": "c",
+        "__hash_table": "c",
+        "array": "c",
+        "deque": "c",
+        "memory_resource": "c",
+        "istream": "c",
+        "memory": "c",
+        "string": "c",
+        "string_view": "c",
+        "unordered_map": "c",
+        "vector": "c",
+        "*.tcc": "c",
+        "avdevice.h": "c",
+        "avformat.h": "c"
+    }
+}

@@ -78,6 +78,7 @@ static const AVCodec *find_probe_decoder(AVFormatContext *s, const AVStream *st,
         return avcodec_find_decoder_by_name("h264");
 #endif
 
+    // 查找解码器
     codec = ff_find_decoder(s, st, codec_id);
     if (!codec)
         return NULL;
@@ -149,13 +150,18 @@ static int set_codec_from_probe_data(AVFormatContext *s, AVStream *st,
     return 0;
 }
 
+/**
+ * 打开输入的视频数据并且探测视频的格式
+*/
 static int init_input(AVFormatContext *s, const char *filename,
                       AVDictionary **options)
 {
     int ret;
     AVProbeData pd = { filename, NULL, 0 };
+    // 分值低于25分认为没有找对格式，需要重试
     int score = AVPROBE_SCORE_RETRY;
 
+    // 从内存中读取
     if (s->pb) {
         s->flags |= AVFMT_FLAG_CUSTOM_IO;
         if (!s->iformat)
@@ -251,6 +257,7 @@ int avformat_open_input(AVFormatContext **ps, const char *filename,
         goto fail;
     }
 
+    // 初始化输入
     if ((ret = init_input(s, filename, &tmp)) < 0)
         goto fail;
     s->probe_score = ret;
@@ -2413,6 +2420,7 @@ static int add_coded_side_data(AVStream *st, AVCodecContext *avctx)
     return 0;
 }
 
+// 给AVStream赋值
 int avformat_find_stream_info(AVFormatContext *ic, AVDictionary **options)
 {
     FFFormatContext *const si = ffformatcontext(ic);
@@ -2609,6 +2617,9 @@ int avformat_find_stream_info(AVFormatContext *ic, AVDictionary **options)
 
         /* NOTE: A new stream can be added there if no header in file
          * (AVFMTCTX_NOHEADER). */
+        /**
+         * 读取完整的一帧压缩编码的数据
+        */
         ret = read_frame_internal(ic, pkt1);
         if (ret == AVERROR(EAGAIN))
             continue;

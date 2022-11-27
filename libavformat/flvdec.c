@@ -91,7 +91,7 @@ static int probe(const AVProbeData *p, int live)
 {
     const uint8_t *d = p->buf;
     unsigned offset = AV_RB32(d + 5);
-
+    // 判断前几个字符
     if (d[0] == 'F' &&
         d[1] == 'L' &&
         d[2] == 'V' &&

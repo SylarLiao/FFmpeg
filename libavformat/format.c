@@ -159,12 +159,22 @@ const AVInputFormat *av_probe_input_format3(const AVProbeData *pd,
             nodat = ID3_GREATER_PROBE;
     }
 
+    // 循环遍历解复用的格式
     while ((fmt1 = av_demuxer_iterate(&i))) {
         if (fmt1->flags & AVFMT_EXPERIMENTAL)
             continue;
         if (!is_opened == !(fmt1->flags & AVFMT_NOFILE) && strcmp(fmt1->name, "image2"))
             continue;
         score = 0;
+        /**
+         * （1）如果AVInputFormat中包含read_probe()，
+         * 就调用read_probe()函数获取匹配分数
+         * （这一方法如果结果匹配的话，一般会获得AVPROBE_SCORE_MAX的分值，即100分）。
+         * 如果不包含该函数，就使用av_match_ext()函数比较输入媒体的扩展名和AVInputFormat的扩展名是否匹配，
+         * 如果匹配的话，设定匹配分数为AVPROBE_SCORE_EXTENSION（AVPROBE_SCORE_EXTENSION取值为50，即50分）。
+            （2）使用av_match_name()比较输入媒体的mime_type和AVInputFormat的mime_type，如果匹配的话，设定匹配分数为AVPROBE_SCORE_MIME（AVPROBE_SCORE_MIME取值为75，即75分）。
+            （3）如果该AVInputFormat的匹配分数大于此前的最大匹配分数，则记录当前的匹配分数为最大匹配分数，并且记录当前的AVInputFormat为最佳匹配的AVInputFormat。
+        */
         if (fmt1->read_probe) {
             score = fmt1->read_probe(&lpd);
             if (score)
@@ -224,6 +234,9 @@ const AVInputFormat *av_probe_input_format(const AVProbeData *pd, int is_opened)
     return av_probe_input_format2(pd, is_opened, &score);
 }
 
+/**
+ * 根据输入的媒体数据推测该媒体数据的AVInputFormat
+*/
 int av_probe_input_buffer2(AVIOContext *pb, const AVInputFormat **fmt,
                            const char *filename, void *logctx,
                            unsigned int offset, unsigned int max_probe_size)
